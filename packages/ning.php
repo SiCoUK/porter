@@ -7,11 +7,11 @@
  * @package VanillaPorter
  */
 
-$Supported['ning'] = array('name' => 'Ning', 'prefix' => '');
+$supported['ning'] = array('name' => 'Ning', 'prefix' => '');
 
-$Supported['ning']['CommandLine'] = array();
+$supported['ning']['CommandLine'] = array();
 
-$Supported['ning']['features'] = array(
+$supported['ning']['features'] = array(
     'Categories' => 1,
     'Comments' => 1,
     'Discussions' => 1,
@@ -25,10 +25,6 @@ $Supported['ning']['features'] = array(
  * @package VanillaPorter
  */
 class Ning extends ExportController {
-    /** @var array Required tables => columns. */
-    protected $sourceTables = array(
-        'deletionlog' => array('type', 'primaryid'),
-    );
 
     protected function forumExport($ex) {
         // Determine the character set
