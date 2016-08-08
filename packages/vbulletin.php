@@ -265,7 +265,6 @@ class VBulletin extends ExportController {
                 u.email as Email,
                 u.referrerid as InviteUserID,
                 u.timezoneoffset as HourOffset,
-                u.timezoneoffset as HourOffset,
                 u.ipaddress as LastIPAddress,
                 u.ipaddress as InsertIPAddress,
                 u.usertitle,
@@ -522,7 +521,6 @@ class VBulletin extends ExportController {
                 convert(ABS(open-1), char(1)) as Closed,
                 if(convert(sticky, char(1)) > 0, 2, 0) as Announce,
                 from_unixtime(t.dateline) as DateInserted,
-                from_unixtime(lastpost) as DateUpdated,
                 from_unixtime(lastpost) as DateLastComment,
                 if (t.pollid > 0, 'Poll', null) as Type
             from :_thread as t
@@ -549,8 +547,7 @@ class VBulletin extends ExportController {
                 'BBCode' as Format,
                 p.userid as InsertUserID,
                 p.userid as UpdateUserID,
-                from_unixtime(p.dateline) as DateInserted,
-                from_unixtime(p.dateline) as DateUpdated
+                from_unixtime(p.dateline) as DateInserted
             from :_post as p
                 inner join :_thread as t on p.threadid = t.threadid
                 left join :_deletionlog as d on (d.type='post' and d.primaryid=p.postid)
@@ -616,7 +613,6 @@ class VBulletin extends ExportController {
                     vm.*,
                     '{RegardingUserID,you} &rarr; {ActivityUserID,you}' as HeadlineFormat,
                     from_unixtime(vm.dateline) as DateInserted,
-                    from_unixtime(vm.dateline) as DateUpdated,
                     inet_ntoa(vm.ipaddress) as InsertIPAddress,
                     vm.postuserid as InsertUserID,
                     -1 as NotifyUserID,
