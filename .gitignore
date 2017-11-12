@@ -22,3 +22,5 @@ custom*
 composer.lock
 vendor
 
+/nbproject
+/nbproject/private/
