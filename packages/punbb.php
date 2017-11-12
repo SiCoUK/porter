@@ -12,7 +12,7 @@ $supported['punbb']['CommandLine'] = array(
     'avatarpath' => array('Full path of forum avatars.', 'Sx' => '::')
 );
 $supported['punbb']['features'] = array(
-    'Avatars' => 1,
+    /*'Avatars' => 1,
     'Comments' => 1,
     'Discussions' => 1,
     'Users' => 1,
@@ -22,7 +22,8 @@ $supported['punbb']['features'] = array(
     'Permissions' => 1,
     'Tags' => 1,
     'Signatures' => 1,
-    'Passwords' => 1
+    'Passwords' => 1,*/
+    'PrivateMessages' => 1
 );
 
 class PunBB extends ExportController {
@@ -46,14 +47,18 @@ class PunBB extends ExportController {
      */
     protected function forumExport($ex) {
 
-        /*$characterSet = $ex->getCharacterSet('posts');
+        $characterSet = $ex->getCharacterSet('posts');
         if ($characterSet) {
             $ex->characterSet = $characterSet;
         }
 
         $ex->beginExport('', 'PunBB 1.*', array('HashMethod' => 'punbb'));
 
-        $this->cdn = $this->param('cdn', '');
+        $this->exportPm($ex);
+        
+        $ex->endExport();
+        
+        /*$this->cdn = $this->param('cdn', '');
 
         if ($avatarPath = $this->param('avatarpath', false)) {
             if (!$avatarPath = realpath($avatarPath)) {
@@ -252,6 +257,78 @@ class PunBB extends ExportController {
         $ex->endExport();*/
     }
 
+    /**
+     * Export the private messages if the plugin is installed
+     */
+    public function exportPm($ex)
+    {
+        $pmTable = 'pun_pm_messages'; // The table has always been double prefixed due to incorrect naming in the extension
+        
+        // Conversation.
+        $conversation_Map = array(
+            'id' => 'ConversationID',
+            'subject' => 'Subject',
+            'sender_id' => 'InsertUserID',
+            'lastedited_at' => array('Column' => 'DateInserted', 'Filter' => 'timestampToDate')
+        );
+        $ex->exportTable('Conversation', "
+         select *
+         from :_pun_pm_messages", $conversation_Map);
+
+        $conversationMessage_Map = array(
+            'id' => 'MessageID',
+            'id' => 'ConversationID',
+            'lastedited_at' => array('Column' => 'DateInserted', 'Filter' => 'timestampToDate'),
+            'sender_id' => 'InsertUserID',
+            'body' => 'Body',
+            'format' => 'Format',
+            'ip' => array('Column' => 'InsertIPAddress')
+        );
+        $ex->exportTable('ConversationMessage', "
+         select
+            m.*,
+            'BBCode' as format,
+            null as ip
+         from :_pun_pm_messages m", $conversationMessage_Map);
+
+        $userConversation_Map = array(
+            'id' => 'ConversationID',
+            'id' => 'LastMessageID',
+            'UserID' => 'UserID',
+            'Deleted' => 'Deleted'
+        );
+        $ex->exportTable('UserConversation', "
+         select
+            r.id,
+            receiver_id AS UserID,
+            r.deleted_by_receiver as Deleted
+         from :_pun_pm_messages r
+
+         union all
+
+         select
+            cu.id,
+            cu.sender_id AS UserID,
+            cu.deleted_by_sender as Deleted
+         from :_pun_pm_messages cu
+         ", $userConversation_Map);
+        
+//        select
+//            r.id,
+//            receiver_id AS UserID,
+//            r.deleted_by_receiver as Deleted
+//         from pun_pun_pm_messages r
+//
+//         union all
+//
+//         select
+//            cu.id,
+//            cu.sender_id AS UserID,
+//            cu.deleted_by_sender as Deleted
+//         from pun_pun_pm_messages cu
+        
+    }
+    
     public function stripMediaPath($absPath) {
         if (($pos = strpos($absPath, '/uploads/')) !== false) {
             return substr($absPath, $pos + 9);
