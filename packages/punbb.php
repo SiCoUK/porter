@@ -46,7 +46,7 @@ class PunBB extends ExportController {
      */
     protected function forumExport($ex) {
 
-        $characterSet = $ex->getCharacterSet('posts');
+        /*$characterSet = $ex->getCharacterSet('posts');
         if ($characterSet) {
             $ex->characterSet = $characterSet;
         }
@@ -249,7 +249,7 @@ class PunBB extends ExportController {
         }
 
         // End
-        $ex->endExport();
+        $ex->endExport();*/
     }
 
     public function stripMediaPath($absPath) {
