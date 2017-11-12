@@ -7,6 +7,8 @@
  * @package VanillaPorter
  */
 
+include('test-settings.php');
+
 /**
  * HTML header.
  */
