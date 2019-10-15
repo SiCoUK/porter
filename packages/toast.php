@@ -2,7 +2,7 @@
 /**
  * Toast (.NET) exporter tool
  *
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2018 Vanilla Forums Inc.
  * @license http://opensource.org/licenses/gpl-2.0.php GNU GPL2
  * @package VanillaPorter
  */
@@ -52,8 +52,7 @@ class Toast extends ExportController {
         // Determine safe RoleID to use for non-existant Member role
         $lastRoleID = 1001;
         $lastRoleResult = $ex->query("select max(ID) as LastID from :_Group");
-        if ($lastRoleResult) {
-            $lastRole = mysql_fetch_array($lastRoleResult);
+        if ($lastRole = $lastRoleResult->nextResultRow()) {
             $lastRoleID = $lastRole['LastID'] + 1;
         }
 

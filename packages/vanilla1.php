@@ -2,7 +2,7 @@
 /**
  * Vanilla 1 exporter tool
  *
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2018 Vanilla Forums Inc.
  * @license http://opensource.org/licenses/gpl-2.0.php GNU GPL2
  * @package VanillaPorter
  */
@@ -87,7 +87,7 @@ class Vanilla1 extends ExportController {
         $r = $ex->query('select max(RoleID) as RoleID from :_Role');
         $zeroRoleID = 0;
         if (is_resource($r)) {
-            while (($row = @mysql_fetch_assoc($r)) !== false) {
+            while ($row = $r->nextResultRow()) {
                 $zeroRoleID = $row['RoleID'];
             }
         }

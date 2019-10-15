@@ -6,7 +6,7 @@
  * To use this script, copy it to your web server and open it in your browser.
  * If you have a large database, make the directory writable so that the export file can be saved locally and zipped.
  *
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2018 Vanilla Forums Inc.
  * @license http://opensource.org/licenses/gpl-2.0.php GNU GPL2
  * @package VanillaPorter
  */
@@ -31,6 +31,7 @@ if (PHP_SAPI == 'cli') {
 global $supported;
 
 // Support Files
+include_once 'config.php';
 include_once 'class.exportmodel.php';
 include_once 'class.exportcontroller.php';
 include_once 'functions/core-functions.php';
@@ -39,9 +40,18 @@ include_once 'functions/filter-functions.php';
 include_once 'functions/commandline-functions.php';
 include_once 'functions/structure-functions.php';
 include_once 'functions/feature-functions.php';
+include_once 'database/class.dbfactory.php';
+include_once 'database/interface.dbresource.php';
+include_once 'database/class.resultset.php';
+include_once 'database/class.mysqlidb.php';
+include_once 'database/class.mysqldb.php';
+include_once 'database/class.pdodb.php';
 
 // Use error handler in functions.php
 set_error_handler("ErrorHandler");
+if(!defined('DB_EXTENSION')) {
+    die('There is an error in your config. You need to set your database extension properly.');
+}
 
 // Set Vanilla to appear first in the list.
 $supported = array(
@@ -87,7 +97,7 @@ if (isset($_REQUEST['features'])) {
         }
         $controller->$method();
     } else {
-        echo 'Invalid type specified: ' . $_POST['type'];
+        echo 'Invalid type specified: ' . htmlspecialchars($_POST['type']);
     }
 } else {
     // Show the web UI to start an export.

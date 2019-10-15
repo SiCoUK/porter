@@ -2,7 +2,7 @@
 /**
  * User Voice exporter tool
  *
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2018 Vanilla Forums Inc.
  * @license http://opensource.org/licenses/gpl-2.0.php GNU GPL2
  * @package VanillaPorter
  */
@@ -185,7 +185,7 @@ class UserVoice extends ExportController {
         $path = '/www/porter/userpics';
         $count = 0;
 
-        while ($row = mysql_fetch_assoc($result)) {
+        while ($row = $result->nextResultRow()) {
             // Build path
             if (!file_exists(dirname($path))) {
                 $r = mkdir(dirname($path), 0777, true);
@@ -226,7 +226,7 @@ class UserVoice extends ExportController {
         $path = '/www/porter/attach';
         $count = 0;
 
-        while ($row = mysql_fetch_assoc($result)) {
+        while ($row = $result->nextResultRow()) {
             // Build path
             if (!file_exists(dirname($path))) {
                 $r = mkdir(dirname($path), 0777, true);

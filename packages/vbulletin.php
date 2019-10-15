@@ -25,7 +25,7 @@
  * filepath - Command line option to fix / check files are on disk.  Files named .attach are renamed
  * to the proper name and missing files are reported in missing-files.txt.
  *
- * @copyright Vanilla Forums Inc. 2010
+ * @copyright 2009-2018 Vanilla Forums Inc.
  * @author Matt Lincoln Russell lincoln@icrontic.com
  * @license http://opensource.org/licenses/gpl-2.0.php GNU GPL2
  * @package VanillaPorter
@@ -63,7 +63,7 @@ $supported['vbulletin']['features'] = array(
 /**
  * vBulletin-specific extension of generic ExportController.
  *
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2018 Vanilla Forums Inc.
  * @license http://opensource.org/licenses/gpl-2.0.php GNU GPL2
  * @package VanillaPorter
  */
@@ -309,7 +309,7 @@ class VBulletin extends ExportController {
         # Put stupid CSV column into tmp table
         $secondaryRoles = $ex->query("select userid, usergroupid, membergroupids from :_user");
         if (is_resource($secondaryRoles)) {
-            while (($row = @mysql_fetch_assoc($secondaryRoles)) !== false) {
+            while ($row = $secondaryRoles->nextResultRow()) {
                 if ($row['membergroupids'] != '') {
                     $groups = explode(',', $row['membergroupids']);
                     foreach ($groups as $groupID) {
@@ -380,7 +380,7 @@ class VBulletin extends ExportController {
 
             if (is_resource($profileFields)) {
                 $profileQueries = array();
-                while ($field = @mysql_fetch_assoc($profileFields)) {
+                while ($field = $profileFields->nextResultRow()) {
                     $column = str_replace('_title', '', $field['varname']);
                     $name = preg_replace('/[^a-zA-Z0-9\s_-]/', '', $field['text']);
                     $profileQueries[] = "
@@ -501,6 +501,10 @@ class VBulletin extends ExportController {
         // Discussions
         $discussion_Map = array(
             'title' => array('Column' => 'Name', 'Filter' => 'HTMLDecoder'),
+            'pagetext' => array('Column' => 'Body', 'Filter' => function ($value) {
+                    return preg_replace('~\[ATTACH=CONFIG\]\d+\[\/ATTACH\]~i', '', $value);
+                }
+            ),
         );
 
         if ($ex->destination == 'database') {
@@ -523,7 +527,7 @@ class VBulletin extends ExportController {
                 t.title,
                 p.postid as ForeignID,
                 p.ipaddress as InsertIPAddress,
-                p.pagetext as Body,
+                p.pagetext,
                 'BBCode' as Format,
                 replycount+1 as CountComments,
                 convert(ABS(open-1), char(1)) as Closed,
@@ -541,7 +545,12 @@ class VBulletin extends ExportController {
         ", $discussion_Map);
 
         // Comments
-        $comment_Map = array();
+        $comment_Map = array(
+            'pagetext' => array('Column' => 'Body', 'Filter' => function ($value) {
+                    return preg_replace('~\[ATTACH=CONFIG\]\d+\[\/ATTACH\]~i', '', $value);
+                }
+            ),
+        );
         if ($minDiscussionID) {
             $minDiscussionWhere = "and p.threadid > $minDiscussionID";
         }
@@ -550,7 +559,7 @@ class VBulletin extends ExportController {
             select
                 p.postid as CommentID,
                 p.threadid as DiscussionID,
-                p.pagetext as Body,
+                p.pagetext,
                 p.ipaddress as InsertIPAddress,
                 'BBCode' as Format,
                 p.userid as InsertUserID,
@@ -657,7 +666,7 @@ class VBulletin extends ExportController {
             ");
 
             $result = $ex->query("select value from :_setting where varname = 'banip'");
-            $row = mysql_fetch_assoc($result);
+            $row = $result->nextResultRow();
 
             if ($row) {
                 $insertSql = 'insert ignore into z_ipbanlist(ipaddress) values ';
@@ -668,7 +677,7 @@ class VBulletin extends ExportController {
                     if (empty($IP)) {
                         continue;
                     }
-                    $insertSql .= '(\''.mysql_real_escape_string($IP).'\'), ';
+                    $insertSql .= '(\''.$ex->escape($IP).'\'), ';
                 }
                 $insertSql = substr($insertSql, 0, -2);
                 $ex->query($insertSql);
@@ -1014,8 +1023,7 @@ class VBulletin extends ExportController {
         if ($ex->exists('attachment', array('contenttypeid', 'contentid')) === true) {
             // Exporting 4.x with 'filedata' table.
             // Build an index to join on.
-            $result = $ex->query('show index from :_thread where Key_name = "ix_thread_firstpostid"', true);
-            if (!mysql_num_rows($result)) {
+            if (!$ex->indexExists('ix_thread_firstpostid', ':_thread')) {
                 $ex->query('create index ix_thread_firstpostid on :_thread (firstpostid)');
             }
             $mediaSql = "
@@ -1104,7 +1112,7 @@ class VBulletin extends ExportController {
             if (is_dir($attachmentPath)) {
                 $ex->comment("Checking files");
                 $result = $ex->query($mediaSql);
-                while ($row = mysql_fetch_assoc($result)) {
+                while ($row = $result->nextResultRow()) {
                     $filePath = $this->buildMediaPath('', '', $row);
                     $cdn = $this->param('cdn', '');
 
@@ -1199,7 +1207,7 @@ class VBulletin extends ExportController {
 
         $r = $ex->query($sql);
         $rowCount = 0;
-        while ($row = mysql_fetch_assoc($r)) {
+        while ($row = $r->nextResultRow()) {
             $options = explode('|||', $row['options']);
 
             foreach ($options as $i => $option) {
@@ -1212,7 +1220,6 @@ class VBulletin extends ExportController {
                 $rowCount++;
             }
         }
-        mysql_free_result($r);
         $ex->writeEndTable($fp);
         $ex->comment("Exported Table: PollOption ($rowCount rows)");
 
@@ -1380,7 +1387,7 @@ class VBulletin extends ExportController {
     public function getConfig($name) {
         $sql = "select * from :_setting where varname = '$name'";
         $result = $this->ex->query($sql, true);
-        if ($row = mysql_fetch_assoc($result)) {
+        if ($row = $result->nextResultRow()) {
             return $row['value'];
         }
 

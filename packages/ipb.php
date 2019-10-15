@@ -4,7 +4,7 @@
  *
  * To export avatars, provide ?avatars=1&avatarpath=/path/to/avatars
  *
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2018 Vanilla Forums Inc.
  * @license http://opensource.org/licenses/gpl-2.0.php GNU GPL2
  * @package VanillaPorter
  */
@@ -88,7 +88,7 @@ class IPB extends ExportController {
         $skipped = 0;
         $completed = 0;
         $errors = array();
-        while (($row = mysql_fetch_assoc($userList)) !== false) {
+        while ($row = $userList->nextResultRow()) {
             $processed++;
             $error = false;
 

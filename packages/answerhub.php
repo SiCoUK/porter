@@ -3,7 +3,7 @@
  * AnswerHub exporter tool.
  * Assume https://github.com/vanilla/addons/tree/master/plugins/QnA will be enabled.
  *
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2018 Vanilla Forums Inc.
  * @license http://opensource.org/licenses/gpl-2.0.php GNU GPL2
  * @package VanillaPorter
  */
@@ -44,7 +44,7 @@ class AnswerHub extends ExportController {
         $ex->beginExport('', 'AnswerHub');
 
         $result = $ex->query("select c_reserved as lastID from :_id_generators where c_identifier = 'AUTHORITABLE'", true);
-        if ($row = mysql_fetch_assoc($result)) {
+        if ($row = $result->nextResultRow()) {
             $lastID = $row['lastID'];
         }
         if (!isset($lastID)) {
