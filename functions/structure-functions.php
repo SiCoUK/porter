@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2018 Vanilla Forums Inc.
  * @license http://opensource.org/licenses/gpl-2.0.php GNU GPL2
  * @package VanillaPorter
  */
@@ -499,7 +499,7 @@ function vanillaStructure() {
             'DateFirstVisit' => 'datetime',
             'DateLastActive' => 'datetime',
             'LastIPAddress' => 'varchar(15)',
-            'AllIPAddresses' => 'varchar(100)',
+            //'AllIPAddresses' => 'varchar(100)',
             'DateInserted' => 'datetime',
             'InsertIPAddress' => 'varchar(15)',
             'DateUpdated' => 'datetime',

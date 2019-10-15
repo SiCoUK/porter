@@ -1,7 +1,7 @@
 {
     "name": "vanilla/porter",
     "description": "Vanilla Porter is a tool for exporting other forums to Vanilla.",
-    "license": "GPLv2",
+    "license": "GPL-2.0",
     "authors": [
         {
             "name": "Todd Burry",
@@ -13,7 +13,7 @@
         }
     ],
     "require": {
-        "php": ">=5.3.0"
+        "php": ">=5.6.0"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "1.5.*"

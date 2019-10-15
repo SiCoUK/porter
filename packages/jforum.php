@@ -2,7 +2,7 @@
 /**
  * jforum exporter tool.
  *
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2018 Vanilla Forums Inc.
  * @license http://opensource.org/licenses/gpl-2.0.php GNU GPL2
  * @package VanillaPorter
  */
@@ -239,8 +239,7 @@ class Jforum extends ExportController {
 
         // Conversation.
         // Thread using tmp table based on the pair of users talking.
-        $result = $ex->query('show index from :_privmsgs where Key_name = "ix_zconversation_from_to"', true);
-        if (!mysql_num_rows($result)) {
+        if (!$ex->indexExists('ix_zconversation_from_to', ':_privmsgs')) {
             $ex->query('create index ix_zconversation_from_to on :_privmsgs (privmsgs_from_userid, privmsgs_to_userid)');
         }
         $ex->query("drop table if exists z_conversation;");

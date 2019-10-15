@@ -2,7 +2,7 @@
 /**
  * Filter functions for passing thru values during export.
  *
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2018 Vanilla Forums Inc.
  * @license http://opensource.org/licenses/gpl-2.0.php GNU GPL2
  * @package VanillaPorter
  */
@@ -344,6 +344,7 @@ function HTMLDecoder($value) {
             $characterSet = 'ISO-8859-15';
             break;
         case 'utf8':
+        case 'utf8mb4':
             $characterSet = 'UTF-8';
             break;
     }
@@ -378,13 +379,13 @@ function timestampToDate($value) {
 }
 
 /**
- * Wrapper for long2ip that nulls 'false' values.
+ * Wrapper for long2ip that nulls 'non-digit' values.
  *
  * @param $value
  * @return null|string
  */
 function long2ipf($value) {
-    if (!$value) {
+    if (!ctype_digit($value)) {
         return null;
     }
 

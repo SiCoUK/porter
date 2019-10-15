@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2018 Vanilla Forums Inc.
  * @license http://opensource.org/licenses/gpl-2.0.php GNU GPL2
  * @package VanillaPorter
  */
@@ -128,7 +128,10 @@ function generateThumbnail($path, $thumbPath, $height = 50, $width = 50) {
                 $sourceImage = imagecreatefromgif($path);
                 break;
             case 2:
-                $sourceImage = imagecreatefromjpeg($path);
+                $sourceImage = @imagecreatefromjpeg($path);
+                if (!$sourceImage) {
+                    $sourceImage = imagecreatefromstring(file_get_contents($path));
+                }
                 break;
             case 3:
                 $sourceImage = imagecreatefrompng($path);

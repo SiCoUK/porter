@@ -1,12 +1,12 @@
 <?php
 /**
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2018 Vanilla Forums Inc.
  * @license http://opensource.org/licenses/gpl-2.0.php GNU GPL2
  * @package VanillaPorter
  */
 
 $globalOptions = array(
-    // Used shortcodes: t, n, u, p, h, x, a, c, f, d, o, s
+    // Used shortcodes: t, n, u, p, h, x, a, c, f, d, o, s, b
     'type' => array(
         'Type of forum we\'re freeing you from.',
         'Req' => true,
@@ -88,7 +88,6 @@ $globalOptions = array(
     'tables' => array(
         'Selective export, limited to specified tables, if provided',
         'Sx' => ':',
-        'Short' => 's',
     )
 );
 
