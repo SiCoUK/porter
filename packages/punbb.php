@@ -54,10 +54,6 @@ class PunBB extends ExportController {
 
         $ex->beginExport('', 'PunBB 1.*', array('HashMethod' => 'punbb'));
 
-        $this->exportPm($ex);
-        
-        $ex->endExport();
-        
         /*$this->cdn = $this->param('cdn', '');
 
         if ($avatarPath = $this->param('avatarpath', false)) {
@@ -136,25 +132,25 @@ class PunBB extends ExportController {
            u.id as UserID,
            'Plugin.Signatures.Format' AS Name,
            'BBCode' as Value
-        from 
+        from
            :_users u
-        where 
-            u.signature is not null 
-        and 
+        where
+            u.signature is not null
+        and
             u.signature != ''
-        
+
         union
-        
+
         select
             u.id as UserID,
             'Plugin.Signatures.Sig' AS Name,
             signature as Value
-        from 
+        from
             :_users u
-        where 
-            u.signature is not null 
-        and 
-            u.signature !='' 
+        where
+            u.signature is not null
+        and
+            u.signature !=''
         ");
 
 
@@ -269,53 +265,46 @@ class PunBB extends ExportController {
                     coalesce(post_id, topic_id) as ForieignID
                 from :_attach_files f
             ", $media_Map);
-        }
+        }*/
 
-        // End
-        $ex->endExport();*/
-    }
-
-    /**
-     * Export the private messages if the plugin is installed
-     */
-    public function exportPm($ex)
-    {
         $pmTable = 'pun_pm_messages'; // The table has always been double prefixed due to incorrect naming in the extension
-        
-        // Conversation.
-        $conversation_Map = array(
-            'id' => 'ConversationID',
-            'subject' => 'Subject',
-            'sender_id' => 'InsertUserID',
-            'lastedited_at' => array('Column' => 'DateInserted', 'Filter' => 'timestampToDate')
-        );
-        $ex->exportTable('Conversation', "
+
+        if ($ex->exists($pmTable)) {
+
+            // Conversation.
+            $conversation_Map = [
+                'id'            => 'ConversationID',
+                'subject'       => 'Subject',
+                'sender_id'     => 'InsertUserID',
+                'lastedited_at' => [ 'Column' => 'DateInserted', 'Filter' => 'timestampToDate' ]
+            ];
+            $ex->exportTable('Conversation', "
          select *
          from :_pun_pm_messages", $conversation_Map);
 
-        $conversationMessage_Map = array(
-            'id' => 'MessageID',
-            'id' => 'ConversationID',
-            'lastedited_at' => array('Column' => 'DateInserted', 'Filter' => 'timestampToDate'),
-            'sender_id' => 'InsertUserID',
-            'body' => 'Body',
-            'format' => 'Format',
-            'ip' => array('Column' => 'InsertIPAddress')
-        );
-        $ex->exportTable('ConversationMessage', "
+            $conversationMessage_Map = [
+                'id'            => 'MessageID',
+                'id'            => 'ConversationID',
+                'lastedited_at' => [ 'Column' => 'DateInserted', 'Filter' => 'timestampToDate' ],
+                'sender_id'     => 'InsertUserID',
+                'body'          => 'Body',
+                'format'        => 'Format',
+                'ip'            => [ 'Column' => 'InsertIPAddress' ]
+            ];
+            $ex->exportTable('ConversationMessage', "
          select
             m.*,
             'BBCode' as format,
             null as ip
          from :_pun_pm_messages m", $conversationMessage_Map);
 
-        $userConversation_Map = array(
-            'id' => 'ConversationID',
-            'id' => 'LastMessageID',
-            'UserID' => 'UserID',
-            'Deleted' => 'Deleted'
-        );
-        $ex->exportTable('UserConversation', "
+            $userConversation_Map = [
+                'id'      => 'ConversationID',
+                'id'      => 'LastMessageID',
+                'UserID'  => 'UserID',
+                'Deleted' => 'Deleted'
+            ];
+            $ex->exportTable('UserConversation', "
          select
             r.id,
             receiver_id AS UserID,
@@ -330,7 +319,7 @@ class PunBB extends ExportController {
             cu.deleted_by_sender as Deleted
          from :_pun_pm_messages cu
          ", $userConversation_Map);
-        
+
 //        select
 //            r.id,
 //            receiver_id AS UserID,
@@ -344,9 +333,11 @@ class PunBB extends ExportController {
 //            cu.sender_id AS UserID,
 //            cu.deleted_by_sender as Deleted
 //         from pun_pun_pm_messages cu
-        
+        }
+        // End
+        $ex->endExport();
     }
-    
+
     public function stripMediaPath($absPath) {
         if (($pos = strpos($absPath, '/uploads/')) !== false) {
             return substr($absPath, $pos + 9);
