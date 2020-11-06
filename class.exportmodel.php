@@ -529,6 +529,7 @@ class ExportModel {
      */
     public function get($sql, $indexColumn = false) {
         $r = $this->_query($sql);
+        $result = [];
 
         while ($row = ($r->nextResultRow())) {
             if ($indexColumn) {
@@ -1243,6 +1244,28 @@ class ExportModel {
         $result = $this->query("show tables like '$tableName'");
 
         return !empty($result->nextResultRow());
+    }
+
+    /**
+     * Determine if a column exists in a table
+     *
+     * @param $tableName
+     * @param $columnName
+     * @return bool
+     */
+    public function columnExists($tableName, $columnName){
+
+        $result=$this->query("
+            select 
+                column_name
+            from 
+                information_schema.columns
+            where 
+                table_schema = database()
+                and table_name = '$tableName'
+                and column_name = '$columnName'
+        ");
+        return $result->nextResultRow() !== false;
     }
 
 }
