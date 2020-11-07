@@ -267,73 +267,86 @@ class PunBB extends ExportController {
             ", $media_Map);
         }*/
 
-        $pmTable = 'pun_pm_messages'; // The table has always been double prefixed due to incorrect naming in the extension
+        /*// Conversations
+        $conversation_Map = [
+            'id'            => 'ConversationID',
+            'subject'       => 'Subject',
+            'sender_id'     => 'InsertUserID',
+            'lastedited_at' => [ 'Column' => 'DateInserted', 'Filter' => 'timestampToDate' ]
+        ];
 
-        if ($ex->exists($pmTable)) {
+        $ex->exportTable('UserConversation',
+            'select distinct
+                 id,
+                subject,
+                 sender_id,
+                lastedited_at,
+                 deleted_by_sender as Deleted
+               from :_pun_pm_messages', $conversation_Map);*/
+
+        // The table has always been double prefixed due to incorrect naming in the extension
+
+        //str_replace(':_', $this->prefix, $sql)
+        if ($ex->exists('pun_pm_messages')) {
 
             // Conversation.
-            $conversation_Map = [
+            $conv_Map = [
                 'id'            => 'ConversationID',
                 'subject'       => 'Subject',
                 'sender_id'     => 'InsertUserID',
-                'lastedited_at' => [ 'Column' => 'DateInserted', 'Filter' => 'timestampToDate' ]
-            ];
-            $ex->exportTable('Conversation', "
-         select *
-         from :_pun_pm_messages", $conversation_Map);
-
-            $conversationMessage_Map = [
-                'id'            => 'MessageID',
-                'id'            => 'ConversationID',
                 'lastedited_at' => [ 'Column' => 'DateInserted', 'Filter' => 'timestampToDate' ],
-                'sender_id'     => 'InsertUserID',
-                'body'          => 'Body',
-                'format'        => 'Format',
-                'ip'            => [ 'Column' => 'InsertIPAddress' ]
             ];
-            $ex->exportTable('ConversationMessage', "
-         select
-            m.*,
-            'BBCode' as format,
-            null as ip
-         from :_pun_pm_messages m", $conversationMessage_Map);
 
-            $userConversation_Map = [
-                'id'      => 'ConversationID',
-                'id'      => 'LastMessageID',
-                'UserID'  => 'UserID',
-                'Deleted' => 'Deleted'
-            ];
-            $ex->exportTable('UserConversation', "
-         select
-            r.id,
-            receiver_id AS UserID,
-            r.deleted_by_receiver as Deleted
-         from :_pun_pm_messages r
+            $ex->exportTable('Conversation',
+                "select *
+                 from :_pun_pm_messages
+                 where deleted_by_sender = 0 OR deleted_by_receiver = 0", $conv_Map);
 
-         union all
+            // ConversationMessage.
+            $convMessage_Map = array(
+                'id' => 'ConversationID',
+                'sender_id' => 'InsertUserID',
+                'body' => array('Column' => 'Body'),
+                'format' => 'Format',
+                'lastedited_at' => [ 'Column' => 'DateInserted', 'Filter' => 'timestampToDate' ],
+            );
+            $ex->exportTable('ConversationMessage',
+                "select
+                 m.*,
+                 'BBCode' as format
+                 from :_pun_pm_messages m
+                 where deleted_by_sender = 0 OR deleted_by_receiver = 0",
+                $convMessage_Map);
 
-         select
-            cu.id,
-            cu.sender_id AS UserID,
-            cu.deleted_by_sender as Deleted
-         from :_pun_pm_messages cu
-         ", $userConversation_Map);
+            // UserConversation
+            $userConv_Map = array(
+                'id' => 'ConversationID',
+                'user' => 'UserID',
+                'read_at' => [ 'Column' => 'DateLastViewed', 'Filter' => 'timestampToDate' ],
+                'lastedited_at' => [ 'Column' => 'DateConversationUpdated', 'Filter' => 'timestampToDate' ],
+            );
+            $ex->exportTable('UserConversation',
+                "select
+                r.id,
+                r.sender_id AS user,
+                r.read_at,
+                r.lastedited_at,
+                r.deleted_by_receiver as Deleted
+                from :_pun_pm_messages r
 
-//        select
-//            r.id,
-//            receiver_id AS UserID,
-//            r.deleted_by_receiver as Deleted
-//         from pun_pun_pm_messages r
-//
-//         union all
-//
-//         select
-//            cu.id,
-//            cu.sender_id AS UserID,
-//            cu.deleted_by_sender as Deleted
-//         from pun_pun_pm_messages cu
+                union all
+
+                select
+                s.id,
+                s.sender_id AS user,
+                s.read_at,
+                s.lastedited_at,
+                s.deleted_by_sender as Deleted
+                from :_pun_pm_messages s",
+                $userConv_Map);
+
         }
+        //var_dump($ex->structures()['UserConversation']);
         // End
         $ex->endExport();
     }
