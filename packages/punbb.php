@@ -12,7 +12,7 @@ $supported['punbb']['CommandLine'] = array(
     'avatarpath' => array('Full path of forum avatars.', 'Sx' => '::')
 );
 $supported['punbb']['features'] = array(
-    /*'Avatars' => 1,
+    'Avatars' => 1,
     'Comments' => 1,
     'Discussions' => 1,
     'Users' => 1,
@@ -22,7 +22,7 @@ $supported['punbb']['features'] = array(
     'Permissions' => 1,
     'Tags' => 1,
     'Signatures' => 1,
-    'Passwords' => 1,*/
+    'Passwords' => 1,
     'PrivateMessages' => 1
 );
 
@@ -54,7 +54,7 @@ class PunBB extends ExportController {
 
         $ex->beginExport('', 'PunBB 1.*', array('HashMethod' => 'punbb'));
 
-        /*$this->cdn = $this->param('cdn', '');
+        $this->cdn = $this->param('cdn', '');
 
         if ($avatarPath = $this->param('avatarpath', false)) {
             if (!$avatarPath = realpath($avatarPath)) {
@@ -265,28 +265,10 @@ class PunBB extends ExportController {
                     coalesce(post_id, topic_id) as ForieignID
                 from :_attach_files f
             ", $media_Map);
-        }*/
+        }
 
-        /*// Conversations
-        $conversation_Map = [
-            'id'            => 'ConversationID',
-            'subject'       => 'Subject',
-            'sender_id'     => 'InsertUserID',
-            'lastedited_at' => [ 'Column' => 'DateInserted', 'Filter' => 'timestampToDate' ]
-        ];
-
-        $ex->exportTable('UserConversation',
-            'select distinct
-                 id,
-                subject,
-                 sender_id,
-                lastedited_at,
-                 deleted_by_sender as Deleted
-               from :_pun_pm_messages', $conversation_Map);*/
-
+        // Conversations
         // The table has always been double prefixed due to incorrect naming in the extension
-
-        //str_replace(':_', $this->prefix, $sql)
         if ($ex->exists('pun_pm_messages')) {
 
             // Conversation.
