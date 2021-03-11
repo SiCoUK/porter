@@ -294,7 +294,6 @@ class PunBB extends ExportController {
             );
             $ex->exportTable('ConversationMessage',
                 "select
-                 m.*,
                  'BBCode' as format
                  from :_pun_pm_messages m
                  where deleted_by_sender = 0 OR deleted_by_receiver = 0",
@@ -310,7 +309,7 @@ class PunBB extends ExportController {
             $ex->exportTable('UserConversation',
                 "select
                 r.id,
-                r.sender_id AS user,
+                r.receiver_id AS user,
                 r.read_at,
                 r.lastedited_at,
                 r.deleted_by_receiver as Deleted
